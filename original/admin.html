@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KERVENTZ Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(to right, #0f0f0f, #111);
+      color: #f1f1f1;
+    }
+
+    header {
+      text-align: center;
+      padding: 30px;
+      font-size: 2rem;
+      color: #39FF14;
+      text-shadow: 0 0 10px #39FF14;
+    }
+
+    .tabs {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+      gap: 12px;
+    }
+
+    .tab-button {
+      background: rgba(255,255,255,0.08);
+      border: none;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-size: 1rem;
+      color: #f1f1f1;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .tab-button.active {
+      background: #00FFFF;
+      color: black;
+      box-shadow: 0 0 8px #00FFFF;
+    }
+
+    .tab-button:hover {
+      transform: scale(1.05);
+    }
+
+    .tab-content {
+      display: none;
+      padding: 20px;
+      max-width: 900px;
+      margin: auto;
+      background: rgba(255,255,255,0.05);
+      border-radius: 12px;
+      box-shadow: 0 0 12px rgba(0,255,255,0.2);
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    input, textarea, select, button {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+      background: #222;
+      color: #f1f1f1;
+      border: 1px solid #00FFFF;
+    }
+
+    button {
+      background-color: #39FF14;
+      color: black;
+      font-weight: bold;
+      box-shadow: 0 0 8px #39FF14;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      transform: scale(1.02);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      padding: 10px;
+      border-bottom: 1px solid #444;
+    }
+
+    th {
+      background-color: #00FFFF;
+      color: black;
+    }
+
+    td button {
+      padding: 6px 10px;
+      margin: 4px 2px;
+      font-size: 0.9rem;
+      border-radius: 5px;
+    }
+
+    .edit-btn {
+      background-color: #39FF14;
+      color: black;
+    }
+
+    .delete-btn {
+      background-color: #ff4444;
+      color: white;
+    }
+
+    .danger-btn {
+      background-color: #b30000;
+      color: white;
+      box-shadow: 0 0 10px #ff4444;
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 0.9rem;
+      color: #aaa;
+    }
+
+    #searchInput {
+      width: 100%;
+      padding: 10px;
+      margin: 20px 0;
+      font-size: 1rem;
+      background: #111;
+      color: #f1f1f1;
+      border: 1px solid #00FFFF;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <header>KERVENTZ - Tableau de bord Administrateur</header>
+
+  <div class="tabs">
+    <button class="tab-button active" onclick="openTab('contacts')">📇 Contacts</button>
+    <button class="tab-button" onclick="openTab('suffixes')">🔤 Suffixes</button>
+    <button class="tab-button" onclick="openTab('params')">⚙️ Paramètres</button>
+    <button class="tab-button" onclick="openTab('stats')">📊 Statistiques</button>
+  </div>
+
+  <div id="contacts" class="tab-content active">
+    <h2>📋 Gestion des Contacts</h2>
+    <input type="text" id="searchInput" placeholder="🔍 Rechercher un contact...">
+    <table id="contactTable">
+      <thead>
+        <tr><th>Nom</th><th>Numéro</th><th>Date</th><th>Actions</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <button class="danger-btn" onclick="deleteAllContacts()">🛑 Supprimer TOUS les contacts</button>
+    <button onclick="downloadVCF()">📥 Télécharger fichier VCF</button>
+  </div>
+
+  <div id="suffixes" class="tab-content">
+    <h2>🔤 Gestion des Suffixes</h2>
+    <input type="text" id="suffixInput" placeholder="Ajouter un suffixe (ex: VIP ✨)" />
+    <button onclick="addSuffix()">➕ Ajouter</button>
+    <ul id="suffixList"></ul>
+  </div>
+
+  <div id="params" class="tab-content">
+    <h2>⚙️ Paramètres dynamiques</h2>
+    <input type="email" id="emailInput" placeholder="Email Gmail de contact" />
+    <input type="text" id="whatsappInput" placeholder="Numéro WhatsApp" />
+    <input type="text" id="groupLinkInput" placeholder="Lien du groupe WhatsApp (https://chat.whatsapp.com/...)" />
+    <input type="text" id="defaultSuffixInput" placeholder="Suffixe par défaut si aucun n'est choisi" />
+    <button onclick="updateParams()">💾 Enregistrer les paramètres</button>
+  </div>
+
+  <div id="stats" class="tab-content">
+    <h2>📊 Statistiques</h2>
+    <p>Total de contacts : <span id="totalCount">0</span></p>
+    <p>Premier inscrit : <span id="firstContact">—</span></p>
+    <p>Dernier inscrit : <span id="lastContact">—</span></p>
+  </div>
+
+  <footer>© KERVENTZ Admin — Console sécurisée</footer><script type="module">
+  import { database } from "./firebase-config.js";
+  import {
+    ref,
+    onValue,
+    set,
+    push,
+    remove,
+    update,
+    get
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+  function openTab(id) {
+    document.querySelectorAll(".tab-button").forEach(btn => btn.classList.remove("active"));
+    document.querySelectorAll(".tab-content").forEach(tab => tab.classList.remove("active"));
+    document.querySelector(`.tab-button[onclick="openTab('${id}')"]`).classList.add("active");
+    document.getElementById(id).classList.add("active");
+  }
+
+  const contactRef = ref(database, "contacts");
+  const suffixRef = ref(database, "suffixes");
+  const paramRef = ref(database, "params");
+
+  function renderContacts() {
+    get(contactRef).then(snapshot => {
+      const data = snapshot.val() || {};
+      const search = document.getElementById("searchInput").value.toLowerCase();
+      const tbody = document.querySelector("#contactTable tbody");
+      tbody.innerHTML = "";
+
+      const contacts = Object.entries(data);
+      document.getElementById("totalCount").textContent = contacts.length;
+      document.getElementById("firstContact").textContent = contacts[0]?.[1].name || "—";
+      document.getElementById("lastContact").textContent = contacts.at(-1)?.[1].name || "—";
+
+      contacts.forEach(([key, { name, phone, date }]) => {
+        if (name.toLowerCase().includes(search) || phone.toLowerCase().includes(search)) {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${name}</td>
+            <td>${phone}</td>
+            <td>${date}</td>
+            <td>
+              <button class="edit-btn" onclick="editContact('${key}')">✏️</button>
+              <button class="delete-btn" onclick="deleteContact('${key}')">🗑️</button>
+            </td>`;
+          tbody.appendChild(tr);
+        }
+      });
+    });
+  }
+
+  document.getElementById("searchInput").addEventListener("input", renderContacts);
+
+  function editContact(key) {
+    get(ref(database, `contacts/${key}`)).then(snapshot => {
+      const contact = snapshot.val();
+      const newName = prompt("Modifier le nom :", contact.name);
+      if (newName) {
+        update(ref(database, `contacts/${key}`), { name: newName });
+        renderContacts();
+      }
+    });
+  }
+
+  function deleteContact(key) {
+    if (confirm("Supprimer ce contact ?")) {
+      remove(ref(database, `contacts/${key}`)).then(renderContacts);
+    }
+  }
+
+  function deleteAllContacts() {
+    if (confirm("🛑 Supprimer TOUS les contacts ? Cette action est irréversible.")) {
+      remove(contactRef).then(renderContacts);
+    }
+  }
+
+  function downloadVCF() {
+    get(contactRef).then(snapshot => {
+      const data = snapshot.val();
+      if (!data) return alert("Aucun contact à exporter.");
+      get(ref(database, "params/defaultSuffix")).then(snap => {
+        const defaultSuffix = snap.val() || "P.😂💔";
+        let vcf = "";
+        Object.values(data).forEach(({ name, phone }) => {
+          const hasSuffix = name.trim().split(" ").length > 1;
+          const fullName = hasSuffix ? name : `${name} ${defaultSuffix}`;
+          vcf += `BEGIN:VCARD\nVERSION:3.0\nFN:${fullName}\nTEL:${phone}\nEND:VCARD\n`;
+        });
+        const blob = new Blob([vcf], { type: "text/vcard" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "KERVENTZ_contacts.vcf";
+        link.click();
+        URL.revokeObjectURL(url);
+      });
+    });
+  }
+
+  function addSuffix() {
+    const input = document.getElementById("suffixInput");
+    const value = input.value.trim();
+    if (!value) return;
+    push(suffixRef, value).then(() => {
+      input.value = "";
+      renderSuffixes();
+    });
+  }
+
+  function renderSuffixes() {
+    get(suffixRef).then(snapshot => {
+      const data = snapshot.val() || {};
+      const ul = document.getElementById("suffixList");
+      ul.innerHTML = "";
+      Object.entries(data).forEach(([key, suffix]) => {
+        const li = document.createElement("li");
+        li.textContent = suffix;
+        const toggle = document.createElement("button");
+        toggle.textContent = suffix.startsWith("🛑") ? "✅ Activer" : "🛑 Désactiver";
+        toggle.onclick = () => toggleSuffix(key, suffix);
+        const del = document.createElement("button");
+        del.textContent = "🗑️ Supprimer";
+        del.onclick = () => remove(ref(database, `suffixes/${key}`)).then(renderSuffixes);
+        li.appendChild(toggle);
+        li.appendChild(del);
+        ul.appendChild(li);
+      });
+    });
+  }
+
+  function toggleSuffix(key, value) {
+    const newValue = value.startsWith("🛑") ? value.replace("🛑", "").trim() : "🛑 " + value.trim();
+    update(ref(database, `suffixes/${key}`), newValue).then(renderSuffixes);
+  }
+
+  function updateParams() {
+    const params = {
+      contactEmail: document.getElementById("emailInput").value.trim(),
+      contactWhatsApp: document.getElementById("whatsappInput").value.trim(),
+      whatsappGroupLink: document.getElementById("groupLinkInput").value.trim(),
+      defaultSuffix: document.getElementById("defaultSuffixInput").value.trim()
+    };
+    update(paramRef, params).then(() => alert("✅ Paramètres enregistrés avec succès !"));
+  }
+
+  function fillParams() {
+    get(paramRef).then(snapshot => {
+      const data = snapshot.val() || {};
+      document.getElementById("emailInput").value = data.contactEmail || "";
+      document.getElementById("whatsappInput").value = data.contactWhatsApp || "";
+      document.getElementById("groupLinkInput").value = data.whatsappGroupLink || "";
+      document.getElementById("defaultSuffixInput").value = data.defaultSuffix || "";
+    });
+  }// ✅ Fonctions exposées à window pour rendre les boutons HTML fonctionnels
+  window.openTab = openTab;
+  window.editContact = editContact;
+  window.deleteContact = deleteContact;
+  window.deleteAllContacts = deleteAllContacts;
+  window.downloadVCF = downloadVCF;
+  window.addSuffix = addSuffix;
+  window.updateParams = updateParams;
+
+  // 🚀 Initialisation automatique au chargement
+  renderContacts();
+  renderSuffixes();
+  fillParams();
+</script>
+</body>
+</html>
