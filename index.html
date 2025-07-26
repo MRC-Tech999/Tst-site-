@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Enregistrement de Contacts / Contact Registration</title>
+  <!-- Styles intégrés -->
+  <style>
+    :root {
+      --primary: #2d7ff9;
+      --primary-dark: #114c8e;
+      --bg: #fff;
+      --bg-alt: #f6f8fa;
+      --text: #222;
+      --border: #e3e7ed;
+      --input-bg: #f5f7fa;
+      --input-border: #cfd8dc;
+      --success: #34c759;
+      --danger: #ff3b30;
+      --shadow: 0 2px 16px rgba(60,72,88,.06);
+      --transition: .2s cubic-bezier(.4,0,.2,1);
+    }
+    [data-theme="dark"] {
+      --bg: #151a1e;
+      --bg-alt: #22262b;
+      --text: #f2f4f8;
+      --border: #2e353c;
+      --input-bg: #23272c;
+      --input-border: #444950;
+      --shadow: 0 2px 16px rgba(0,0,0,.22);
+    }
+    html { box-sizing: border-box; }
+    *,*:before,*:after { box-sizing: inherit; }
+    body {
+      margin: 0; padding: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+      min-height: 100vh;
+      transition: background var(--transition), color var(--transition);
+      font-size: 16px;
+    }
+    .container {
+      max-width: 420px;
+      margin: 48px auto 0 auto;
+      background: var(--bg-alt);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      padding: 32px 24px 24px 24px;
+      border: 1px solid var(--border);
+    }
+    h1 {
+      font-size: 1.4rem;
+      margin-bottom: .4em;
+      font-weight: 600;
+      letter-spacing: .01em;
+      text-align: center;
+    }
+    .lang-theme-row {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 1.2em;
+    }
+    .lang-select {
+      border: none;
+      background: var(--input-bg);
+      color: var(--text);
+      font-size: 1em;
+      border-radius: 7px;
+      padding: 4px 8px;
+      margin-right: 8px;
+      transition: background var(--transition), color var(--transition);
+    }
+    .theme-toggle {
+      border: 0;
+      background: var(--input-bg);
+      color: var(--text);
+      border-radius: 7px;
+      padding: 4px 10px;
+      cursor: pointer;
+      font-size: 1em;
+      transition: background var(--transition), color var(--transition);
+      display: flex; align-items: center; gap: 5px;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      margin: 1.5em 0 1em 0;
+    }
+    label {
+      font-weight: 500;
+      margin-bottom: 4px;
+      display: block;
+    }
+    input[type="text"], input[type="tel"] {
+      padding: 10px 12px;
+      border-radius: 7px;
+      border: 1.5px solid var(--input-border);
+      background: var(--input-bg);
+      color: var(--text);
+      font-size: 1em;
+      outline: none;
+      transition: border var(--transition), background var(--transition), color var(--transition);
+      width: 100%;
+    }
+    input[type="text"]:focus, input[type="tel"]:focus {
+      border-color: var(--primary);
+    }
+    .submit-btn {
+      padding: 12px 0;
+      border-radius: 7px;
+      border: none;
+      background: var(--primary);
+      color: #fff;
+      font-size: 1.1em;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background var(--transition);
+      box-shadow: 0 2px 8px rgba(45,127,249,.10);
+    }
+    .submit-btn:hover, .submit-btn:focus {
+      background: var(--primary-dark);
+    }
+    .counter {
+      margin: 1.3em 0 0 0;
+      text-align: center;
+      font-size: 1.04em;
+      color: var(--primary-dark);
+      background: var(--bg);
+      border-radius: 5px;
+      padding: 7px 0;
+      font-weight: 500;
+      border: 1px solid var(--border);
+    }
+    .footer {
+      text-align: center;
+      margin: 2.5em 0 1em 0;
+      color: #888;
+      font-size: .95em;
+      opacity: .82;
+    }
+    @media (max-width: 600px) {
+      .container { padding: 22px 8px 14px 8px; }
+      h1 { font-size: 1.08rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="lang-theme-row">
+      <select id="lang" class="lang-select" aria-label="Sélecteur de langue / Language selector">
+        <option value="fr">Français</option>
+        <option value="en">English</option>
+      </select>
+      <button class="theme-toggle" id="themeToggle" aria-label="Basculer mode clair/sombre">
+        <span id="themeIcon" aria-hidden="true">🌙</span>
+        <span id="themeLabel">Sombre</span>
+      </button>
+    </div>
+    <h1 id="mainTitle">Enregistrement de contact</h1>
+    <form id="contactForm" autocomplete="off">
+      <div>
+        <label for="fullName" id="nameLabel">Nom complet</label>
+        <input type="text" id="fullName" name="fullName" required maxlength="64" pattern="[^0-9!@#$%^&*()_+=\[\]{};':\"\\|,.<>/?]{2,}" autocomplete="off" placeholder="Jean Dupont">
+      </div>
+      <div>
+        <label for="phone" id="phoneLabel">Numéro de téléphone</label>
+        <input type="tel" id="phone" name="phone" required maxlength="20" pattern="[\d\+\-\s\(\)]{6,}" autocomplete="off" placeholder="+33 6 01 23 45 67">
+      </div>
+      <button type="submit" class="submit-btn" id="submitBtn">Enregistrer</button>
+    </form>
+    <div class="counter" id="counter">
+      0 contact enregistré
+    </div>
+  </div>
+  <div class="footer">
+    &copy; 2025 - Contact Registration App
+  </div>
+
+  <!-- JavaScript embarqué -->
+  <script>
+    // Traductions : objets JS (on pourrait utiliser JSON, mais JS natif ici)
+    const translations = {
+      fr: {
+        mainTitle: "Enregistrement de contact",
+        nameLabel: "Nom complet",
+        phoneLabel: "Numéro de téléphone",
+        submitBtn: "Enregistrer",
+        counter_singular: "contact enregistré",
+        counter_plural: "contacts enregistrés",
+        theme_light: "Clair",
+        theme_dark: "Sombre",
+        placeholder_name: "Jean Dupont",
+        placeholder_phone: "+33 6 01 23 45 67"
+      },
+      en: {
+        mainTitle: "Contact Registration",
+        nameLabel: "Full Name",
+        phoneLabel: "Phone Number",
+        submitBtn: "Save",
+        counter_singular: "contact saved",
+        counter_plural: "contacts saved",
+        theme_light: "Light",
+        theme_dark: "Dark",
+        placeholder_name: "John Smith",
+        placeholder_phone: "+1 555 123 4567"
+      }
+    };
+
+    // Détection et stockage de la langue
+    function getSavedLanguage() {
+      return localStorage.getItem("lang") || (navigator.language.startsWith("fr") ? "fr" : "en");
+    }
+
+    function setLanguage(lang) {
+      localStorage.setItem("lang", lang);
+      // Appliquer les traductions
+      const t = translations[lang];
+      document.getElementById('mainTitle').textContent = t.mainTitle;
+      document.getElementById('nameLabel').textContent = t.nameLabel;
+      document.getElementById('phoneLabel').textContent = t.phoneLabel;
+      document.getElementById('submitBtn').textContent = t.submitBtn;
+      document.getElementById('fullName').placeholder = t.placeholder_name;
+      document.getElementById('phone').placeholder = t.placeholder_phone;
+      // Met à jour le compteur avec la bonne langue
+      updateContactCounter();
+      // Mettre à jour le sélecteur
+      document.getElementById('lang').value = lang;
+      // Mettre à jour le thème label en fonction du thème actuel
+      updateThemeLabel();
+    }
+
+    // Thème clair/sombre
+    function getSavedTheme() {
+      return localStorage.getItem("theme") || "light";
+    }
+
+    function setTheme(theme) {
+      localStorage.setItem("theme", theme);
+      document.documentElement.setAttribute('data-theme', theme === "dark" ? "dark" : "light");
+      updateThemeLabel();
+    }
+
+    function toggleTheme() {
+      const current = getSavedTheme();
+      setTheme(current === "dark" ? "light" : "dark");
+    }
+
+    function updateThemeLabel() {
+      const theme = getSavedTheme();
+      const lang = getSavedLanguage();
+      const btn = document.getElementById('themeToggle');
+      const icon = document.getElementById('themeIcon');
+      const label = document.getElementById('themeLabel');
+      if (theme === "dark") {
+        icon.textContent = "🌞";
+        label.textContent = translations[lang].theme_light;
+      } else {
+        icon.textContent = "🌙";
+        label.textContent = translations[lang].theme_dark;
+      }
+    }
+
+    // Gestion des contacts via localStorage
+    function getContacts() {
+      try {
+        return JSON.parse(localStorage.getItem("contacts") || "[]");
+      } catch {
+        return [];
+      }
+    }
+
+    function saveContact(contact) {
+      const contacts = getContacts();
+      contacts.push(contact);
+      localStorage.setItem("contacts", JSON.stringify(contacts));
+    }
+
+    function updateContactCounter() {
+      const lang = getSavedLanguage();
+      const count = getContacts().length;
+      const label = count <= 1 ? translations[lang].counter_singular : translations[lang].counter_plural;
+      document.getElementById('counter').textContent = `${count} ${label}`;
+    }
+
+    // Génération et téléchargement d'une vCard (.vcf)
+    function generateVCard({ fullName, phone }) {
+      // vCard 3.0 format
+      const lines = [
+        "BEGIN:VCARD",
+        "VERSION:3.0",
+        `FN:${fullName}`,
+        `TEL;TYPE=CELL:${phone.replace(/[^+\d]/g, '')}`,
+        "END:VCARD"
+      ];
+      return lines.join('\r\n');
+    }
+
+    function downloadVCard(vcard, filename) {
+      const blob = new Blob([vcard], { type: 'text/vcard;charset=utf-8' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      document.body.appendChild(link); // Nécessaire pour Firefox
+      link.click();
+      setTimeout(() => {
+        document.body.removeChild(link);
+        URL.revokeObjectURL(link.href);
+      }, 100);
+    }
+
+    // Redirection après soumission
+    function redirectToThankYou(lang) {
+      // Ajoute la langue dans l'URL pour affichage multilingue sur thankyou.html
+      window.location.href = `thankyou.html?lang=${lang}`;
+    }
+
+    // Initialisation
+    document.addEventListener("DOMContentLoaded", () => {
+      // Appliquer préférences utilisateur
+      setTheme(getSavedTheme());
+      setLanguage(getSavedLanguage());
+
+      // Écouteurs événement
+      document.getElementById('lang').addEventListener('change', (e) => {
+        setLanguage(e.target.value);
+      });
+      document.getElementById('themeToggle').addEventListener('click', (e) => {
+        e.preventDefault();
+        toggleTheme();
+      });
+
+      // Gestion soumission formulaire
+      document.getElementById('contactForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const fullName = document.getElementById('fullName').value.trim();
+        const phone = document.getElementById('phone').value.trim();
+        if (!fullName || !phone) return;
+
+        // Enregistrement local
+        saveContact({ fullName, phone, timestamp: Date.now() });
+        updateContactCounter();
+
+        // Générer et télécharger la vCard
+        const vcf = generateVCard({ fullName, phone });
+        // Nettoyer nom pour le nom du fichier
+        const safeName = fullName.replace(/[^a-z0-9]/gi, '_').toLowerCase().slice(0,30) || "contact";
+        downloadVCard(vcf, `${safeName}.vcf`);
+
+        // Redirection
+        setTimeout(() => redirectToThankYou(getSavedLanguage()), 300);
+      });
+
+      // MAJ compteur en temps réel si storage modifié ailleurs
+      window.addEventListener('storage', (e) => {
+        if (e.key === "contacts") updateContactCounter();
+      });
+
+      // Initialiser compteur
+      updateContactCounter();
+    });
+  </script>
+</body>
+</html>
