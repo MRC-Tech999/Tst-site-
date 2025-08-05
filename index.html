@@ -2,83 +2,90 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>📤 Hébergeur d'image VEZXA</title>
+  <title>Uploader une image - VEZXA</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     body {
-      background-color: #0d0d0d;
-      color: #00ffff;
-      font-family: sans-serif;
+      background-color: #000;
+      color: #0ff;
+      font-family: Arial, sans-serif;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      height: 100vh;
+      padding: 2rem;
+      min-height: 100vh;
       text-align: center;
     }
-
     input[type="file"] {
-      margin: 20px;
-      background-color: #111;
+      margin: 1rem 0;
+      border: 1px solid #0ff;
+      border-radius: 5px;
+      padding: 0.5rem;
+      background: #111;
       color: #fff;
-      padding: 10px;
-      border-radius: 8px;
-      cursor: pointer;
     }
-
     button {
-      padding: 10px 20px;
-      background-color: #00ffff;
+      background: #0ff;
       border: none;
-      border-radius: 6px;
+      padding: 0.8rem 2rem;
+      font-size: 1rem;
       font-weight: bold;
+      border-radius: 10px;
       cursor: pointer;
+      margin-top: 1rem;
     }
-
-    #result {
-      margin-top: 20px;
-      color: #fff;
+    #message {
+      margin-top: 1rem;
+      font-weight: bold;
     }
-
     a {
-      color: #00ff99;
+      color: #0f0;
+      word-break: break-all;
     }
   </style>
 </head>
 <body>
   <h1>📤 Hébergeur d'image VEZXA</h1>
-  <input type="file" id="imageFile" accept="image/*">
-  <button onclick="upload()">Uploader</button>
-
-  <div id="result"></div>
+  <input type="file" id="imageInput" accept="image/*">
+  <button onclick="uploadImage()">Uploader</button>
+  <div id="message"></div>
 
   <script>
-    async function upload() {
-      const file = document.getElementById('imageFile').files[0];
-      if (!file) {
-        alert("Choisissez une image !");
+    async function uploadImage() {
+      const fileInput = document.getElementById('imageInput');
+      const message = document.getElementById('message');
+      message.innerHTML = '';
+
+      if (!fileInput.files.length) {
+        message.innerHTML = '❌ Aucune image sélectionnée.';
+        message.style.color = 'red';
         return;
       }
 
+      const file = fileInput.files[0];
       const formData = new FormData();
-      formData.append("image", file);
-
-      const result = document.getElementById('result');
-      result.innerHTML = "⏳ Envoi en cours...";
+      formData.append('image', file);
 
       try {
-        const response = await fetch("https://cloud.vezxa.xyz/upload", {
-          method: "POST",
+        const res = await fetch('https://cloud.vezxa.xyz/upload', {
+          method: 'POST',
           body: formData
         });
 
-        const data = await response.json();
-        if (data.status) {
-          result.innerHTML = `✅ <a href="${data.url}" target="_blank">${data.url}</a><br><br><img src="${data.url}" width="200">`;
+        const data = await res.json();
+
+        if (data.status && data.url) {
+          message.innerHTML = `✅ Lien direct : <br><a href="${data.url}" target="_blank">${data.url}</a>`;
+          message.style.color = '#0f0';
         } else {
-          result.innerHTML = `❌ Erreur : ${data.message}`;
+          message.innerHTML = '❌ Échec de l\'upload.';
+          message.style.color = 'red';
         }
-      } catch (e) {
-        result.innerHTML = "❌ Erreur réseau ou serveur.";
+
+      } catch (error) {
+        message.innerHTML = '❌ Erreur réseau ou serveur.';
+        message.style.color = 'red';
       }
     }
   </script>
